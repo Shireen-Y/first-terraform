@@ -34,18 +34,21 @@ resource "aws_security_group" "app_security_group" {
   name = var.name
   description = "Allow inbound traffic on port 80"
   vpc_id = var.vpc_id
+
   ingress {
     from_port = 80
     to_port = 80
     protocol = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   ingress {
     from_port = 3000
     to_port = 3000
     protocol = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
   tags = {
     Name = "${var.name} - sg"
   }

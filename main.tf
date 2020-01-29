@@ -30,3 +30,9 @@ module "app" {
 }
 
 # Call module to create db_tier
+module "db" {
+  source = "./modules/db_tier"
+  vpc_id = aws_vpc.app_vpc.id
+  app_security_group_id = module.app.app_security_group_id
+  name = var.name
+}
