@@ -5,5 +5,5 @@ variable "name" {
 
 variable "ami_id" {
     type = string
-    default = "ami-0c796dc8f5acf4c08"
+    default = "ami-0e959b54a92188f49"
 }
