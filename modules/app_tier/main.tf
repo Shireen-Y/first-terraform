@@ -7,7 +7,7 @@ resource "aws_subnet" "app_subnet" {
   cidr_block = "10.0.0.0/24"
   availability_zone = "eu-west-1a"
   tags = {
-    Name = "${var.name} - subnet"
+    Name = "${var.app_name} - subnet"
   }
 }
 
@@ -19,7 +19,7 @@ resource "aws_route_table" "app_route_table" {
     gateway_id = var.gateway_id
   }
   tags = {
-    Name = "${var.name} - route"
+    Name = "${var.app_name} - route"
   }
 }
 
@@ -31,8 +31,9 @@ resource "aws_route_table_association" "app_assoc" {
 
 # Create security groups
 resource "aws_security_group" "app_security_group" {
-  name = var.name
-  description = "Allow inbound traffic on port 80"
+  tags = {
+    Name = "${var.app_name} - sg"
+    }
   vpc_id = var.vpc_id
 
   ingress {
@@ -48,20 +49,40 @@ resource "aws_security_group" "app_security_group" {
     protocol = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
-  tags = {
-    Name = "${var.name} - sg"
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 27017
+    to_port = 27017
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 # Send template to sh file
 data "template_file" "app_init" {
   template = "${file("./scripts/init_script.sh.tpl")}"
+  vars = {
+    db-ip=var.db_instance-ip
+  }
 }
 
 # Launch an instance
 resource "aws_instance" "app_instance" {
-  ami           = var.ami_id
+  ami           = var.ami_id_app
   subnet_id = aws_subnet.app_subnet.id
   vpc_security_group_ids = [aws_security_group.app_security_group.id]
   instance_type = "t2.micro"
@@ -69,6 +90,6 @@ resource "aws_instance" "app_instance" {
   key_name = "shireen-eng-48-first-key"
   user_data = data.template_file.app_init.rendered
   tags = {
-    Name = "${var.name} - instance"
+    Name = "${var.app_name} - app instance"
   }
 }

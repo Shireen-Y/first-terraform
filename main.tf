@@ -8,7 +8,7 @@ provider "aws" {
 resource "aws_vpc" "app_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
-    Name = "${var.name} - VPC"
+    Name = "${var.app_name} - VPC"
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_vpc" "app_vpc" {
 resource "aws_internet_gateway" "app_gw" {
   vpc_id = aws_vpc.app_vpc.id
   tags = {
-    Name = "${var.name} - igw"
+    Name = "${var.app_name} - igw"
   }
 }
 
@@ -25,14 +25,18 @@ module "app" {
   source = "./modules/app_tier"
   vpc_id = aws_vpc.app_vpc.id
   gateway_id = aws_internet_gateway.app_gw.id
-  name = var.name
-  ami_id = var.ami_id
+  app_name = var.app_name
+  db_instance-ip = module.db.db_instance-ip
+  ami_id_app = var.ami_id_app
+  pub_ip = module.db.pub_ip
 }
 
 # Call module to create db_tier
 module "db" {
   source = "./modules/db_tier"
   vpc_id = aws_vpc.app_vpc.id
+  gateway_id = aws_internet_gateway.app_gw.id
   app_security_group_id = module.app.app_security_group_id
-  name = var.name
+  db_name = var.db_name
+  ami_id_db = var.ami_id_db
 }

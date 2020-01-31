@@ -6,10 +6,18 @@ variable "gateway_id" {
   description = "Gateway ID interpolated from original variables.tf"
 }
 
-variable "name" {
+variable "app_name" {
   description = "Name interpolated from original variables.tf file"
 }
 
-variable "ami_id" {
+variable "ami_id_app" {
   description = "AMI ID interpolated from original variables.tf file"
+}
+
+variable "pub_ip" {
+  description = "Generated ip"
+}
+
+variable "db_instance-ip" {
+  description = "IP of the db instance"
 }
